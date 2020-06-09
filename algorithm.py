@@ -1,9 +1,6 @@
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn as sns
+import pandas as pd
+import numpy as np
 from sklearn.cluster import KMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
-from sklearn import datasets
 from utils import calculate_clustering_accuracy, display_clustering_accuracy, write_to_csv
 
 
@@ -17,23 +14,24 @@ report = dict()
 
 def prepare_dataset():
 
-    global dataset_name
     global dataset
     global data
     global actual_labels
 
-    dataset = datasets.load_iris()
+    df = pd.read_csv('datasets/leukemia-preprocessed-datasets/leukemia-selected-10.csv')
 
-    data = dataset.data[:]
+    df['class'] = df['class'].apply(lambda x: 0 if x == 'ALL' else 1)
 
-    actual_labels = dataset.target
+    data = df.drop('class',axis=1).copy()
+
+    actual_labels = df['class']
 
 
-def implement_KMeans():
+def implement_KMeans(clustering_data):
 
-    model = KMeans(n_clusters=3)
+    model = KMeans(n_clusters=2, random_state=1)
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- KMeans Clustering -----\n')
 
@@ -42,11 +40,11 @@ def implement_KMeans():
     display_clustering_accuracy(report['kmeans'])
 
 
-def implement_Affinity_Propagation():
+def implement_Affinity_Propagation(clustering_data):
 
-    model = AffinityPropagation(random_state=5)
+    model = AffinityPropagation()
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- Affinity Propagation Clustering -----\n')
 
@@ -55,11 +53,11 @@ def implement_Affinity_Propagation():
     display_clustering_accuracy(report['affinity_propagation'])
 
 
-def implement_MeanShift():
+def implement_MeanShift(clustering_data):
 
     model = MeanShift()
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- MeanShift Clustering -----\n')
 
@@ -68,11 +66,11 @@ def implement_MeanShift():
     display_clustering_accuracy(report['meanshift'])
 
 
-def implement_Spectral_Clustering():
+def implement_Spectral_Clustering(clustering_data):
 
-    model = SpectralClustering(n_clusters=3)
+    model = SpectralClustering(n_clusters=2, random_state=0)
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- Spectral Clustering -----\n', end='\n')
 
@@ -81,11 +79,11 @@ def implement_Spectral_Clustering():
     display_clustering_accuracy(report['spectral'])
 
 
-def implement_Agglomerative_Clustering():
+def implement_Agglomerative_Clustering(clustering_data):
 
-    model = AgglomerativeClustering(n_clusters=3)
+    model = AgglomerativeClustering(n_clusters=2)
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- Agglomerative Clustering -----\n', end='\n')
 
@@ -94,11 +92,11 @@ def implement_Agglomerative_Clustering():
     display_clustering_accuracy(report['agglomerative'])
 
 
-def implement_DBSCAN():
+def implement_DBSCAN(clustering_data):
 
     model = DBSCAN()
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- DBSCAN Clustering -----\n')
 
@@ -107,11 +105,11 @@ def implement_DBSCAN():
     display_clustering_accuracy(report['dbscan'])
 
 
-def implement_OPTICS():
+def implement_OPTICS(clustering_data):
 
     model = OPTICS()
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- OPTICS Clustering -----\n')
 
@@ -120,11 +118,11 @@ def implement_OPTICS():
     display_clustering_accuracy(report['optics'])
 
 
-def implement_Birch():
+def implement_Birch(clustering_data):
 
-    model = Birch(n_clusters=3)
+    model = Birch(n_clusters=2)
 
-    predicted_labels = model.fit_predict(data)
+    predicted_labels = model.fit_predict(clustering_data)
 
     print('\n----- Birch Clustering -----\n')
 
@@ -133,16 +131,16 @@ def implement_Birch():
     display_clustering_accuracy(report['birch'])
 
 
-def implement_ALL():
+def implement_ALL(clustering_data):
 
-    implement_KMeans()
-    implement_Affinity_Propagation()
-    implement_MeanShift()
-    implement_Spectral_Clustering()
-    implement_Agglomerative_Clustering()
-    implement_DBSCAN()
-    implement_OPTICS()
-    implement_Birch()
+    implement_KMeans(clustering_data)
+    implement_Affinity_Propagation(clustering_data)
+    implement_MeanShift(clustering_data)
+    implement_Spectral_Clustering(clustering_data)
+    implement_Agglomerative_Clustering(clustering_data)
+    implement_DBSCAN(clustering_data)
+    implement_OPTICS(clustering_data)
+    implement_Birch(clustering_data)
 
 
 def generate_report():
@@ -152,7 +150,7 @@ def generate_report():
 
     dataset_name = input('Enter a name for the dataset: ')
 
-    implement_ALL()
+    implement_ALL(data.copy())
     write_to_csv(dataset_name, report)
 
 
@@ -174,7 +172,10 @@ def switch(choice):
 
     global switcher
 
-    return switcher.get(choice)()
+    if choice == 10:
+      return switcher.get(choice)()
+    else:
+      return switcher.get(choice)(data.copy())
 
 
 def main():
