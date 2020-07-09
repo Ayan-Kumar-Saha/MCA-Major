@@ -127,7 +127,7 @@ def get_predefined_dataset():
     while True:
         print('\nPlease a choose a dataset')
         print('1. Leukemia dataset with 10 attributes')
-        print('2. Leukemia dataset with 20 attributes')
+        print('2. Leukemia dataset with 25 attributes')
         print('3. Leukemia dataset with 100 attributes')
         print('4. DLBCL dataset with 10 attributes')
         print('5. DLBCL dataset with 25 attributes')

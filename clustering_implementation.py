@@ -1,6 +1,5 @@
 from sklearn.cluster import KMeans, AgglomerativeClustering, SpectralClustering, Birch
 from evaluation import evaluate_clustering
-# from algorithm import user_dataset_flag, user_dataset_class_attribute
 from utils import extract_clustering_data
 
 

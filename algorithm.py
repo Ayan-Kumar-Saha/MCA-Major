@@ -73,7 +73,6 @@ def get_dataset_as_dataframe():
 def switch(choice, df):
 
     global switcher
-    # global dataset_name
 
     if user_dataset_flag:
         return switcher.get(choice)(df.copy(), class_attribute = user_dataset_class_attribute)
