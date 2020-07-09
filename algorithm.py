@@ -1,211 +1,123 @@
 import pandas as pd
-import numpy as np
-from sklearn.cluster import KMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
-from utils import calculate_clustering_accuracy, display_clustering_accuracy, write_to_csv
+from clustering_implementation import implement_kmeans, implement_agglomerative, implement_spectral, implement_birch, implement_all
+from data_manager import get_predefined_dataset
+from output_manager import write_to_csv, display_clustering_result
+from utils import is_valid_path, extract_filename
+import os
+import time
 
-
+user_dataset_flag = False
+dataset_path = None
 dataset_name = None
-dataset = None
-data = None
-actual_labels = None
-
-report = dict()
-
-
-def prepare_dataset():
-
-    global dataset
-    global data
-    global actual_labels
-
-    df = pd.read_csv('datasets/leukemia-preprocessed-datasets/leukemia-selected-10.csv')
-
-    df['class'] = df['class'].apply(lambda x: 0 if x == 'ALL' else 1)
-
-    data = df.drop('class',axis=1).copy()
-
-    actual_labels = df['class']
-
-
-def implement_KMeans(clustering_data):
-
-    model = KMeans(n_clusters=2, random_state=1)
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- KMeans Clustering -----\n')
-
-    report['kmeans'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['kmeans'])
-
-
-def implement_Affinity_Propagation(clustering_data):
-
-    model = AffinityPropagation()
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- Affinity Propagation Clustering -----\n')
-
-    report['affinity_propagation'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['affinity_propagation'])
-
-
-def implement_MeanShift(clustering_data):
-
-    model = MeanShift()
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- MeanShift Clustering -----\n')
-
-    report['meanshift'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['meanshift'])
-
-
-def implement_Spectral_Clustering(clustering_data):
-
-    model = SpectralClustering(n_clusters=2, random_state=0)
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- Spectral Clustering -----\n', end='\n')
-
-    report['spectral'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['spectral'])
-
-
-def implement_Agglomerative_Clustering(clustering_data):
-
-    model = AgglomerativeClustering(n_clusters=2)
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- Agglomerative Clustering -----\n', end='\n')
-
-    report['agglomerative'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['agglomerative'])
-
-
-def implement_DBSCAN(clustering_data):
-
-    model = DBSCAN()
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- DBSCAN Clustering -----\n')
-
-    report['dbscan'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['dbscan'])
-
-
-def implement_OPTICS(clustering_data):
-
-    model = OPTICS()
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- OPTICS Clustering -----\n')
-
-    report['optics'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['optics'])
-
-
-def implement_Birch(clustering_data):
-
-    model = Birch(n_clusters=2)
-
-    predicted_labels = model.fit_predict(clustering_data)
-
-    print('\n----- Birch Clustering -----\n')
-
-    report['birch'] = calculate_clustering_accuracy(actual_labels, predicted_labels)
-
-    display_clustering_accuracy(report['birch'])
-
-
-def implement_ALL(clustering_data):
-
-    implement_KMeans(clustering_data)
-    implement_Affinity_Propagation(clustering_data)
-    implement_MeanShift(clustering_data)
-    implement_Spectral_Clustering(clustering_data)
-    implement_Agglomerative_Clustering(clustering_data)
-    implement_DBSCAN(clustering_data)
-    implement_OPTICS(clustering_data)
-    implement_Birch(clustering_data)
-
-
-def generate_report():
-
-    global dataset_name
-    global report
-
-    dataset_name = input('Enter a name for the dataset: ')
-
-    implement_ALL(data.copy())
-    write_to_csv(dataset_name, report)
-
+user_dataset_class_attribute = None
+local_data_directory_path = 'datasets'
 
 switcher = {
-        1: implement_KMeans,
-        2: implement_Affinity_Propagation,
-        3: implement_MeanShift,
-        4: implement_Spectral_Clustering,
-        5: implement_Agglomerative_Clustering,
-        6: implement_DBSCAN,
-        7: implement_OPTICS,
-        8: implement_Birch,
-        9: implement_ALL,
-        10: generate_report
+        1: implement_kmeans,
+        2: implement_spectral,
+        3: implement_agglomerative,
+        4: implement_birch,
+        5: implement_all,
     }
 
 
-def switch(choice):
+def get_dataset_choice():
+
+    global dataset_name
+    global user_dataset_flag
+
+    print('\n1. Use default datasets')
+    print('2. Use own datasets')
+
+    response = int(input('\nEnter your choice: '))
+
+    if response == 2:
+        dataset_name = get_dataset_from_user()
+        user_dataset = True
+
+    else:
+        dataset_name = get_predefined_dataset()
+
+
+def get_dataset_from_user():
+
+    global dataset_path
+    global user_dataset_class_attribute
+
+    while True:
+
+        dataset_path = input('\nPlease provide the path of the dataset: ')
+
+        if is_valid_path(dataset_path):
+            user_dataset_class_attribute = input('\nPlease provide the class label attribute name: ')
+            return extract_filename(dataset_path)
+        
+        print("\nPath doesn't exist! Please provide a valid path!")
+
+
+def get_dataset_as_dataframe():
+
+    global dataset_path
+    global dataset_name
+    global local_data_directory_path
+
+    if user_dataset_flag:
+        path = dataset_path
+    
+    else:
+        path = os.path.join(local_data_directory_path, dataset_name)
+
+    return pd.read_csv(path)
+
+
+def switch(choice, df):
 
     global switcher
+    # global dataset_name
 
-    if choice == 10:
-      return switcher.get(choice)()
+    if user_dataset_flag:
+        return switcher.get(choice)(df.copy(), class_attribute = user_dataset_class_attribute)
+
     else:
-      return switcher.get(choice)(data.copy())
-
+        return switcher.get(choice)(df.copy(), class_attribute= 'class')
 
 def main():
 
-    prepare_dataset()
+    global dataset_name
+
+    get_dataset_choice()
 
     while True:
+
+        df = get_dataset_as_dataframe()
+        
         print('\n\n--MAIN MENU--')
         print('1. KMeans')
-        print('2. Affinity Propagation')
-        print('3. MeanShift')
-        print('4. Spectral Clustering')
-        print('5. Agglomerative Clustering')
-        print('6. DBSCAN')
-        print('7. OPTICS')
-        print('8. Birch')
-        print('9. Run ALL')
-        print('10. Run ALL and Generate Report')
+        print('2. Spectral Clustering')
+        print('3. Agglomerative Clustering')
+        print('4. Birch')
+        print('5. Run ALL')
+        print('6. Run ALL and Generate Report')
         print('0: EXIT')
 
         choice = int(input('\nEnter your choice: '))
 
-        if choice not in range(11):
-            print('Invalid choice')
+        if choice not in range(7):
+            print('Invalid choice!! Enter again!!')
 
         elif choice == 0:
             break
 
         else:
-            switch(choice)
+
+            if choice == 6:
+                result = switch(5, df)
+                write_to_csv(dataset_name, result)
+
+            else:
+                result = switch(choice, df)
+
+            display_clustering_result(result)
 
 
 main()
