@@ -1,6 +1,7 @@
 import pandas as pd
 from clustering_implementation import implement_kmeans, implement_agglomerative, implement_spectral, implement_birch, implement_all
-from data_manager import get_predefined_dataset
+# from data_manager_1 import get_predefined_dataset
+from data_manager_2 import get_predefined_dataset
 from output_manager import write_to_csv, display_clustering_result
 from utils import is_valid_path, extract_filename
 import os
