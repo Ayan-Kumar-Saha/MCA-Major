@@ -10,6 +10,8 @@ dlbcl_remote_URL = 'https://raw.githubusercontent.com/kalyaniuniversity/mgx-data
 
 childall_remote_URL = 'https://raw.githubusercontent.com/kalyaniuniversity/mgx-datasets/master/GSE412/datasets/preprocessed/'
 
+mll_leukemia_remote_URL = 'https://raw.githubusercontent.com/kalyaniuniversity/mgx-datasets/master/MLL/datasets/preprocessed/'
+
 
 def isin_local_data_directory(file_name):
 
@@ -131,6 +133,31 @@ def provide_child_all_dataset(choice):
     return dataset_name
 
 
+def provide_mll_leukemia_dataset(choice):
+
+    global mll_leukemia_remote_URL
+
+    if choice == 13:
+        dataset_name = 'mll-leukemia-selected-10.csv'
+    
+    elif choice == 14:
+        dataset_name = 'mll-leukemia-selected-25.csv'
+
+    elif choice == 15:
+        dataset_name = 'mll-leukemia-selected-100.csv'
+
+    else:
+        dataset_name = 'mll-leukemia-selected-1000.csv'
+
+    remote_URL = mll_leukemia_remote_URL + dataset_name
+
+    if not isin_local_data_directory(dataset_name):
+
+        store_in_local_data_directory(remote_URL, dataset_name)
+
+    return dataset_name
+
+
 def get_predefined_dataset():
 
     while True:
@@ -147,6 +174,10 @@ def get_predefined_dataset():
         print('10. Child All dataset with 25 attributes')
         print('11. Child All dataset with 100 attributes')
         print('12. Child All dataset with 1000 attributes')
+        print('13. MLL Leukemia dataset with 10 attributes')
+        print('14. MLL Leukemia dataset with 25 attributes')
+        print('15. MLL Leukemia dataset with 100 attributes')
+        print('16. MLL Leukemia dataset with 1000 attributes')
 
         choice = int(input('\nEnter your choice: '))
 
@@ -158,6 +189,9 @@ def get_predefined_dataset():
 
         elif choice in [9, 10, 11, 12]:
             return provide_child_all_dataset(choice)
+        
+        elif choice in [13, 14, 15, 16]:
+            return provide_mll_leukemia_dataset(choice)
         
         else:
             print('\nWrong Input! Enter again!')
